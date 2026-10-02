@@ -1,0 +1,142 @@
+/* Optional palettes sampled from the supplied theme board. Layout stays Graphite. */
+#widget-root[data-theme="nocturne"] {
+  color-scheme: dark;
+  --app: #1a1026; --surface: #30203b; --surface-raised: #402b4b;
+  --surface-hover: #4d3557; --line: #5b3e62; --line-strong: #79547c;
+  --text: #ede6ee; --muted: #c9bacd; --quiet: #a890ad;
+  --accent: #d6c3d8; --accent-ink: #1a1026; --accent-soft: #79496b;
+}
+#widget-root[data-theme="dune"] {
+  color-scheme: light;
+  --app: #ead8c7; --surface: #f2e2d1; --surface-raised: #e0c6ae;
+  --surface-hover: #dcc0a8; --line: #c7a992; --line-strong: #b9947b;
+  --text: #40332c; --muted: #6f5b4e; --quiet: #8a7160;
+  --accent: #5e5443; --accent-ink: #f4e8dc; --accent-soft: #d0aa95;
+  --green: #4c6653; --yellow: #986b3c; --red: #a65f56;
+}
+#widget-root[data-theme="lagoon"] {
+  color-scheme: dark;
+  --app: #002b36; --surface: #154b52; --surface-raised: #1d5f63;
+  --surface-hover: #286d70; --line: #35777a; --line-strong: #4c9797;
+  --text: #e0efed; --muted: #afd2cb; --quiet: #85b8b3;
+  --accent: #d9e5dc; --accent-ink: #002b36; --accent-soft: #367a79;
+}
+#widget-root[data-theme="crimson"] {
+  color-scheme: dark;
+  --app: #2b0a12; --surface: #451621; --surface-raised: #5a1e2d;
+  --surface-hover: #6e2536; --line: #713545; --line-strong: #93485d;
+  --text: #f1e3e4; --muted: #d6b8bd; --quiet: #bb9199;
+  --accent: #ead8dc; --accent-ink: #2b0a12; --accent-soft: #8b3e52;
+}
+#widget-root[data-theme="jade"] {
+  color-scheme: dark;
+  --app: #1b2e28; --surface: #29483c; --surface-raised: #336b5c;
+  --surface-hover: #3c7665; --line: #477964; --line-strong: #68a28c;
+  --text: #edf2e9; --muted: #c2d9ca; --quiet: #9ab9a8;
+  --accent: #e4efe3; --accent-ink: #1b2e28; --accent-soft: #5d8d76;
+}
+#widget-root[data-theme="velvet"] {
+  color-scheme: dark;
+  --app: #1a1331; --surface: #302145; --surface-raised: #3a2757;
+  --surface-hover: #4b3267; --line: #604076; --line-strong: #805696;
+  --text: #ece5f1; --muted: #cdbedc; --quiet: #a18bb9;
+  --accent: #d9c8e6; --accent-ink: #1a1331; --accent-soft: #704d80;
+}
+#widget-root[data-theme="amber"] {
+  color-scheme: dark;
+  --app: #211710; --surface: #2d2119; --surface-raised: #38291e;
+  --surface-hover: #433125; --line: #4a382c; --line-strong: #6b5040;
+  --text: #f3e8d8; --muted: #c8b6a2; --quiet: #9e8d7d;
+  --accent: #e8d4ba; --accent-ink: #211710; --accent-soft: #473426;
+}
+#widget-root[data-theme="sakura"] {
+  color-scheme: dark;
+  --app: #0b0e1a; --surface: #2b2032; --surface-raised: #392942;
+  --surface-hover: #493451; --line: #60415d; --line-strong: #855b78;
+  --text: #f3e6ec; --muted: #d9bacb; --quiet: #ac8ca5;
+  --accent: #f1dce7; --accent-ink: #0b0e1a; --accent-soft: #744965;
+}
+#widget-root[data-theme="lumiere"] {
+  color-scheme: dark;
+  --app: #151a22; --surface: #1d2330; --surface-raised: #272d38;
+  --surface-hover: #303845; --line: #353d49; --line-strong: #535d6b;
+  --text: #f0e7dd; --muted: #b8b4ae; --quiet: #8b9098;
+  --accent: #e8d3bf; --accent-ink: #151a22; --accent-soft: #343942;
+  --small-accent: #e45532;
+}
+#widget-root[data-theme="noir-amber"] {
+  color-scheme: dark;
+  --app: #17181d; --surface: #22242b; --surface-raised: #2b2c35;
+  --surface-hover: #34363e; --line: #3a3b43; --line-strong: #55545e;
+  --text: #f1e7dc; --muted: #bcb6b0; --quiet: #939099;
+  --accent: #f0d3b8; --accent-ink: #17181d; --accent-soft: #39363a;
+  --small-accent: #d58c4c;
+}
+#widget-root[data-theme="violet-ink"] {
+  color-scheme: dark;
+  --app: #0c0b10; --surface: #17141e; --surface-raised: #211b29;
+  --surface-hover: #2b2334; --line: #332b3d; --line-strong: #55435f;
+  --text: #eee9ef; --muted: #b8acbf; --quiet: #8e8396;
+  --accent: #e1d7e6; --accent-ink: #0c0b10; --accent-soft: #352b40;
+  --small-accent: #9b69c0;
+}
+#widget-root[data-theme="moss-noir"] {
+  color-scheme: dark;
+  --app: #111511; --surface: #1b211c; --surface-raised: #252d26;
+  --surface-hover: #303a31; --line: #3a473c; --line-strong: #58675a;
+  --text: #eae9df; --muted: #b9c1b6; --quiet: #8f9a8e;
+  --accent: #dddfd0; --accent-ink: #111511; --accent-soft: #344136;
+  --small-accent: #9faf8b;
+}
+
+/* On the new dark palettes, large controls stay dark; colour marks only small details. */
+#widget-root:is([data-theme="lumiere"], [data-theme="noir-amber"], [data-theme="violet-ink"], [data-theme="moss-noir"], [data-theme="amber"]) .m-btn:not(.ghost) {
+  background: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+}
+#widget-root:is([data-theme="lumiere"], [data-theme="noir-amber"], [data-theme="violet-ink"], [data-theme="moss-noir"], [data-theme="amber"]) .m-toggle input:checked + .m-toggle-track {
+  background: var(--surface-raised);
+  border-color: var(--small-accent, var(--muted));
+}
+#widget-root:is([data-theme="lumiere"], [data-theme="noir-amber"], [data-theme="violet-ink"], [data-theme="moss-noir"], [data-theme="amber"]) .m-toggle input:checked + .m-toggle-track + .m-toggle-thumb {
+  background: var(--small-accent, var(--muted));
+}
+#widget-root:is([data-theme="lumiere"], [data-theme="noir-amber"], [data-theme="violet-ink"], [data-theme="moss-noir"], [data-theme="amber"]) .tab.active::after,
+#widget-root:is([data-theme="lumiere"], [data-theme="noir-amber"], [data-theme="violet-ink"], [data-theme="moss-noir"], [data-theme="amber"]) .conn-dot:not(.off) {
+  background: var(--small-accent, var(--muted));
+}
+#widget-root[data-theme="amber"] { --small-accent: #bd824a; }
+
+html, body { background: transparent !important; }
+[hidden] { display: none !important; }
+#widget-root {
+  --surface-opacity: 100%;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--app) var(--surface-opacity), transparent);
+}
+.modal {
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--app) var(--surface-opacity), transparent);
+}
+.card, .m-block, .empty-state {
+  background: color-mix(in srgb, var(--surface) var(--surface-opacity), transparent);
+}
+.card:hover, .m-group:hover {
+  background: color-mix(in srgb, var(--surface-hover) var(--surface-opacity), transparent);
+}
+.card.active {
+  background: color-mix(in srgb, var(--accent-soft) var(--surface-opacity), transparent);
+}
+.m-group, .m-btn.ghost, .toast {
+  background: color-mix(in srgb, var(--surface-raised) var(--surface-opacity), transparent);
+}
+#widget-root[data-theme="light"] .card.active {
+  background: color-mix(in srgb, #d4d1cb var(--surface-opacity), transparent);
+}
+#widget-root[data-theme="dune"] .card.active .card-sub,
+#widget-root[data-theme="dune"] .card.active .ping { color: var(--muted); }
+#widget-root[data-theme="dune"] .group-row { border-bottom-color: rgba(50,36,25,.14); }
+.transparency-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.transparency-head output { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.transparency-range { width: 100%; margin: 4px 0; accent-color: var(--accent); cursor: pointer; }

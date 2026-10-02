@@ -1,0 +1,13 @@
+node_modules/
+src-tauri/target/
+work/
+web/preview.html
+/index.html
+/icon.png
+/make-icon.js
+/flags/
+/src-tauri/gen/
+/docs/screenshots/mihomo-widget-appearance.png
+*.key
+*.key.pub
+*.log

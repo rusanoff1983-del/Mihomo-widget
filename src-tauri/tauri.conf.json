@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Mihomo Widget",
+  "version": "1.0.0",
+  "identifier": "local.proxy-widget.tauri",
+  "build": {
+    "frontendDist": "../web"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Mihomo Widget",
+        "width": 520,
+        "height": 540,
+        "minWidth": 420,
+        "minHeight": 420,
+        "decorations": false,
+        "transparent": true,
+        "noRedirectionBitmap": true,
+        "alwaysOnTop": true,
+        "resizable": true,
+        "visible": true,
+        "center": false,
+        "x": 900,
+        "y": 40
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "msi"],
+    "createUpdaterArtifacts": true,
+    "icon": ["icons/icon.png", "icons/icon.ico"]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDhCRkFBM0QyNzI2ODA1RUMKUldUc0JXaHkwcVA2aS9hVGVqbzMwRFZYWHltUmdIeDhLZnpGUGllZnFNUFpGb0dxck52dktUK1QK",
+      "endpoints": ["https://github.com/rusanoff1983-del/Mihomo-widget/releases/latest/download/latest.json"],
+      "windows": { "installMode": "passive" }
+    }
+  }
+}

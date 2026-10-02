@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Mihomo</title>
+<style>
+:root {
+  color-scheme: dark;
+  --app: #1b1b1b;
+  --surface: #262626;
+  --surface-raised: #303030;
+  --surface-hover: #363636;
+  --line: #383838;
+  --line-strong: #505050;
+  --text: #f1f0ee;
+  --muted: #b6b4b1;
+  --quiet: #918f8c;
+  --accent: #dedbd6;
+  --accent-ink: #1b1b1b;
+  --accent-soft: #686663;
+  --green: #d5d2cc;
+  --yellow: #c1bdb7;
+  --red: #a5a19c;
+  --shadow: 0 18px 48px rgba(0,0,0,.38);
+}
+#widget-root[data-theme="light"] {
+  color-scheme: light;
+  --app: #efeeec;
+  --surface: #fffefd;
+  --surface-raised: #e8e7e4;
+  --surface-hover: #e3e1dd;
+  --line: #d8d6d2;
+  --line-strong: #bbb8b2;
+  --text: #242321;
+  --muted: #6c6965;
+  --quiet: #827f7a;
+  --accent: #343330;
+  --accent-ink: #fffefd;
+  --accent-soft: #d6d4cf;
+  --green: #585651;
+  --yellow: #716e68;
+  --red: #7d7772;
+  --shadow: 0 18px 48px rgba(36,50,70,.16);
+}
+* { box-sizing: border-box; }
+html, body { width:100%; height:100%; margin:0; overflow:hidden; background:var(--app); }
+body { font-family: "Segoe UI", Inter, system-ui, sans-serif; color:var(--text); }
+button, input, select { font:inherit; }
+button { color:inherit; }
+*:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+#widget-root {
+  position:relative; display:flex; flex-direction:column; width:100%; height:100%; min-width:0;
+  overflow:hidden; padding:16px; background:var(--app); color:var(--text); user-select:none;
+}
+.topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:38px; flex-shrink:0; }
+.brand { display:flex; align-items:center; gap:10px; min-width:0; -webkit-app-region:no-drag; }
+.brand-mark { width:32px; height:32px; display:grid; place-items:center; flex:none; border:1px solid var(--line-strong); border-radius:10px; color:var(--accent); background:var(--accent-soft); }
+.brand-mark svg { width:17px; height:17px; }
+.brand-copy { min-width:0; display:flex; flex-direction:column; gap:2px; }
+.brand-name { font-size:13px; line-height:16px; font-weight:700; letter-spacing:-.2px; }
+.connection-line { display:flex; align-items:center; gap:6px; min-width:0; font-size:10px; color:var(--muted); }
+.conn-dot { width:6px; height:6px; border-radius:50%; flex:none; background:var(--green); box-shadow:0 0 0 3px color-mix(in srgb, var(--green) 13%, transparent); }
+.conn-dot.off { background:var(--quiet); box-shadow:none; }
+.host-label { max-width:190px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.toolbar { display:flex; align-items:center; gap:6px; flex:none; -webkit-app-region:no-drag; }
+.icon-button { display:grid; place-items:center; width:32px; height:32px; border:1px solid transparent; border-radius:9px; color:var(--muted); background:transparent; cursor:pointer; transition:background .16s ease,color .16s ease,border-color .16s ease,transform .16s ease; }
+.icon-button svg { width:16px; height:16px; }
+.icon-button:hover { color:var(--text); background:var(--surface-raised); border-color:var(--line); }
+.icon-button:active { transform:scale(.96); }
+.refresh-btn.spinning svg { animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.drag-region { -webkit-app-region:drag; }
+.drag-region button, .drag-region .no-drag { -webkit-app-region:no-drag; }
+.main-content { display:flex; flex-direction:column; min-height:0; flex:1; }
+.group-row { display:flex; align-items:center; gap:8px; margin:18px 0 14px; flex:none; -webkit-app-region:no-drag; }
+.tabs { display:flex; align-items:center; gap:6px; min-width:0; flex:1; overflow-x:auto; scrollbar-width:none; padding:2px; }
+.tabs::-webkit-scrollbar { display:none; }
+.tab { display:inline-flex; align-items:center; justify-content:center; min-height:32px; min-width:64px; padding:0 14px; flex:none; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--muted); font-size:11px; line-height:1; font-weight:600; white-space:nowrap; cursor:pointer; transition:all .16s ease; }
+.tab:hover { border-color:var(--line-strong); color:var(--text); background:var(--surface-hover); }
+.tab.active { border-color:var(--accent); color:var(--accent-ink); background:var(--accent); box-shadow:0 3px 12px color-mix(in srgb, var(--accent) 20%, transparent); }
+.tab-add-btn { display:grid; place-items:center; width:32px; height:32px; flex:none; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--muted); cursor:pointer; transition:all .16s ease; }
+.tab-add-btn svg { width:15px; height:15px; }
+.tab-add-btn:hover { border-color:var(--line-strong); color:var(--text); background:var(--surface-hover); }
+.status-panel { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:66px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:linear-gradient(135deg,var(--surface-raised),var(--surface)); flex:none; }
+.status-copy { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.section-kicker, .panel-kicker { color:var(--quiet); font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+.active-route { display:flex; align-items:center; gap:8px; min-width:0; font-size:13px; font-weight:650; }
+.section-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.section-name .flag, .section-name .flag-glyph { vertical-align:middle; margin-right:2px; }
+.status-metrics { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex:none; }
+.metric { display:flex; align-items:center; gap:5px; min-height:27px; padding:0 8px; border:1px solid var(--line); border-radius:8px; color:var(--muted); background:var(--app); font:10px/1 ui-monospace,Consolas,monospace; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.metric svg { width:12px; height:12px; color:var(--quiet); }
+.section-ip { color:var(--muted); }
+.section-speed { color:var(--green); font-variant-numeric:tabular-nums; }
+.divider { height:1px; margin:14px 0 12px; background:var(--line); flex:none; }
+.scroll-area { flex:1; min-height:0; margin-right:-5px; padding:0 5px 4px 0; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--line-strong) transparent; }
+.scroll-area::-webkit-scrollbar { width:5px; }
+.scroll-area::-webkit-scrollbar-thumb { border-radius:5px; background:var(--line-strong); }
+.cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:8px; align-content:start; }
+.card { display:flex; min-width:0; min-height:68px; flex-direction:column; justify-content:space-between; gap:9px; padding:10px 11px; border:1px solid var(--line); border-radius:11px; background:var(--surface); cursor:pointer; transition:transform .14s ease,border-color .14s ease,background .14s ease,box-shadow .14s ease; }
+.card:hover { transform:translateY(-1px); border-color:var(--line-strong); background:var(--surface-hover); }
+.card:active { transform:scale(.99); }
+.card.active { border-color:color-mix(in srgb,var(--accent) 64%,var(--line)); background:var(--accent-soft); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 12%,transparent); }
+.card-top { display:flex; align-items:center; width:100%; min-width:0; }
+.flag { width:18px; height:18px; flex:none; margin-right:8px; border-radius:50%; object-fit:cover; }
+.flag-glyph { display:inline-grid; place-items:center; width:22px; height:22px; flex:none; margin-right:8px; border:1px solid var(--line-strong); border-radius:7px; color:var(--accent); background:var(--accent-soft); }
+.flag-glyph svg { display:block; width:13px; height:13px; }
+.glyph-vps,.glyph-pc,.glyph-direct,.glyph-auto,.glyph-balance,.glyph-media,.glyph-globe { color:var(--accent); background:var(--accent-soft); }
+.card-title { min-width:0; flex:1; overflow:hidden; color:var(--text); font-size:11px; line-height:15px; font-weight:650; text-overflow:ellipsis; white-space:nowrap; }
+.card.active .card-title { color:var(--text); }
+.card-bottom { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; min-width:0; }
+.card-sub { overflow:hidden; color:var(--quiet); font-size:9px; font-weight:650; letter-spacing:.6px; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap; }
+.ping { flex:none; color:var(--green); font-size:10px; font-weight:650; font-variant-numeric:tabular-nums; }
+.ping.warn { color:var(--yellow); }
+.ping.bad { color:var(--red); }
+.ping.none { color:var(--quiet); }
+.ping-badge { color:var(--green); font-size:10px; font-weight:650; font-variant-numeric:tabular-nums; }
+.ping-badge.warn { color:var(--yellow); }
+.ping-badge.bad { color:var(--red); }
+.ping-badge.none { color:var(--quiet); }
+.section-node-ping { color:var(--green); font-size:10px; font-weight:650; font-variant-numeric:tabular-nums; }
+.section-node-ping.warn { color:var(--yellow); }
+.section-node-ping.bad { color:var(--red); }
+.section-node-ping.none { color:var(--quiet); }
+/* Settings are full-size in-app panels; the back arrow always returns to the widget. */
+.modal { position:absolute; z-index:50; inset:0; display:none; flex-direction:column; gap:14px; overflow-y:auto; padding:18px; background:var(--app); color:var(--text); }
+.modal.open { display:flex; }
+.m-head { display:flex; align-items:center; gap:12px; min-height:38px; flex:none; }
+.m-back { display:flex; align-items:center; gap:8px; min-height:32px; padding:0 10px 0 7px; border:1px solid var(--line); border-radius:9px; color:var(--muted); background:var(--surface); font-size:11px; font-weight:600; cursor:pointer; }
+.m-back svg { width:15px; height:15px; }
+.m-back:hover { color:var(--text); border-color:var(--line-strong); background:var(--surface-hover); }
+.m-title-wrap { display:flex; flex-direction:column; gap:2px; }
+.m-title { color:var(--text); font-size:14px; line-height:18px; font-weight:700; letter-spacing:-.25px; }
+.m-subtitle { color:var(--muted); font-size:10px; line-height:14px; }
+.m-block { display:flex; flex-direction:column; gap:7px; padding:13px; border:1px solid var(--line); border-radius:11px; background:var(--surface); }
+.m-label { color:var(--muted); font-size:9px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; }
+.m-hint { color:var(--quiet); font-size:10px; line-height:1.5; }
+.m-input,.m-select { width:100%; min-height:36px; padding:0 10px; border:1px solid var(--line); border-radius:8px; color:var(--text); background:var(--app); font-size:11px; }
+.m-input::placeholder { color:var(--quiet); }
+.m-input:focus,.m-select:focus { outline:2px solid color-mix(in srgb,var(--accent) 48%,transparent); outline-offset:0; border-color:var(--accent); }
+.m-select { cursor:pointer; }
+.m-select option { color:var(--text); background:var(--surface); }
+.m-row { display:flex; gap:8px; }
+.m-row .m-btn { flex:1; }
+.m-btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:36px; padding:0 13px; border:1px solid var(--accent); border-radius:8px; color:var(--accent-ink); background:var(--accent); font-size:11px; font-weight:700; cursor:pointer; transition:filter .15s ease,transform .15s ease; }
+.m-btn svg { width:14px; height:14px; }
+.m-btn:hover { filter:brightness(1.08); }
+.m-btn:active { transform:scale(.98); }
+.m-btn.ghost { border-color:var(--line); color:var(--text); background:var(--surface-raised); }
+.m-btn.ghost:hover { border-color:var(--line-strong); background:var(--surface-hover); }
+.m-status { min-height:14px; color:var(--muted); font-size:10px; line-height:14px; }
+.m-status.ok { color:var(--green); }
+.m-status.err { color:var(--red); }
+.m-groups { display:flex; flex-direction:column; gap:6px; }
+.m-group { display:flex; align-items:center; gap:10px; min-height:42px; padding:0 11px; border:1px solid var(--line); border-radius:9px; color:var(--text); background:var(--surface-raised); font-size:11px; cursor:pointer; transition:border-color .15s ease,background .15s ease; }
+.m-group:hover { border-color:var(--line-strong); background:var(--surface-hover); }
+.m-group input { width:15px; height:15px; flex:none; margin:0; accent-color:var(--accent); cursor:pointer; }
+.m-group-name { min-width:0; flex:1; overflow:hidden; font-weight:650; text-overflow:ellipsis; white-space:nowrap; }
+.m-group-meta { color:var(--muted); font-size:10px; font-variant-numeric:tabular-nums; }
+.group-order { display:flex; align-items:center; gap:4px; flex:none; }
+.order-btn { display:grid; place-items:center; width:25px; height:25px; border:1px solid var(--line); border-radius:7px; color:var(--muted); background:var(--surface); cursor:pointer; }
+.order-btn svg { width:13px; height:13px; }
+.order-btn:hover:not(:disabled) { border-color:var(--line-strong); color:var(--text); background:var(--surface-hover); }
+.order-btn:disabled { cursor:default; opacity:.35; }
+.m-section-title { color:var(--quiet); font-size:9px; font-weight:700; letter-spacing:.9px; text-transform:uppercase; }
+.m-nuar-row { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:42px; padding:7px 0; border-bottom:1px solid var(--line); }
+.m-nuar-row:last-child { border-bottom:0; }
+.m-nuar-label { color:var(--text); font-size:11px; font-weight:600; }
+.m-nuar-sub { margin-top:3px; color:var(--muted); font-size:9px; line-height:13px; }
+.m-toggle { position:relative; width:36px; height:20px; flex:none; cursor:pointer; }
+.m-toggle input { position:absolute; width:1px; height:1px; opacity:0; }
+.m-toggle-track { position:absolute; inset:0; border:1px solid var(--line-strong); border-radius:99px; background:var(--surface-hover); transition:background .18s ease,border-color .18s ease; }
+.m-toggle input:checked + .m-toggle-track { border-color:var(--accent); background:var(--accent); }
+.m-toggle-thumb { position:absolute; top:3px; left:3px; width:12px; height:12px; border-radius:50%; background:var(--muted); transition:transform .18s ease,background .18s ease; }
+.m-toggle input:checked + .m-toggle-track + .m-toggle-thumb { transform:translateX(16px); background:var(--accent-ink); }
+.toast { position:absolute; z-index:100; bottom:14px; left:50%; max-width:calc(100% - 28px); overflow:hidden; padding:9px 13px; transform:translate(-50%,20px); border:1px solid var(--line-strong); border-radius:9px; color:var(--text); background:var(--surface-raised); font-size:11px; font-weight:600; text-overflow:ellipsis; white-space:nowrap; opacity:0; pointer-events:none; box-shadow:var(--shadow); transition:opacity .18s ease,transform .18s ease; }
+.toast.show { transform:translate(-50%,0); opacity:1; }
+.toast.error { border-color:color-mix(in srgb,var(--red) 45%,var(--line)); }
+.toast.success { border-color:color-mix(in srgb,var(--green) 45%,var(--line)); }
+#widget-root.nuar-icons .flag,#widget-root.nuar-icons .flag-glyph { filter:grayscale(1); opacity:.78; }
+#widget-root.nuar-ping .ping,#widget-root.nuar-ping .ping-badge { color:var(--muted)!important; }
+#widget-root.nuar-all .flag,#widget-root.nuar-all .flag-glyph { filter:grayscale(1); opacity:.72; }
+#widget-root.nuar-all .ping,#widget-root.nuar-all .ping-badge { color:var(--muted)!important; }
+#widget-root.nuar-all .conn-dot { background:var(--quiet)!important; box-shadow:none; }
+@media (max-width:460px) {
+  #widget-root { padding:12px; }
+  .group-row { margin:12px 0 10px; }
+  .cards { grid-template-columns:1fr; }
+  .metric { padding:0 6px; }
+  .host-label { max-width:130px; }
+}
+</style>
+<link rel="stylesheet" href="assets/tabler-icons-300.css">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="themes-extra.css?v=3">
+</head>
+<body>
+<div id="widget-root">
+<header class="topbar drag-region" data-tauri-drag-region>
+  <div class="brand" data-tauri-drag-region>
+    <div class="brand-copy" data-tauri-drag-region>
+      <span class="brand-name" data-tauri-drag-region>Mihomo</span>
+      <span class="connection-line"><span class="conn-dot off" id="connDot"></span><span class="host-label" id="hostLabel">Не подключено</span></span>
+    </div>
+  </div>
+  <div class="toolbar">
+    <button class="icon-button refresh-btn" id="refreshBtn" title="Проверить задержку" aria-label="Обновить" type="button"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+    <button class="icon-button" id="settingsBtn" title="Настройки" aria-label="Настройки" type="button"><i class="ti ti-settings" aria-hidden="true"></i></button>
+    <button class="icon-button" id="closeBtn" title="Скрыть в трей" aria-label="Скрыть в трей" type="button"><i class="ti ti-x" aria-hidden="true"></i></button>
+  </div>
+</header>
+
+<main class="main-content">
+  <div class="group-row">
+    <div class="tabs" id="tabs" role="tablist" aria-label="Группы прокси"></div>
+    <button class="tab-add-btn" id="openGroupsBtn" title="Настроить вкладки групп" aria-label="Настроить группы" type="button"><i class="ti ti-plus" aria-hidden="true"></i></button>
+  </div>
+
+  <section class="status-panel" aria-label="Текущий узел">
+    <div class="status-copy"><span class="section-kicker" id="groupTitle">Подключение</span><div class="active-route"><span class="section-name" id="activeNode">Подключите Mihomo</span></div></div>
+    <div class="status-metrics">
+      <span class="metric" title="Внешний IP"><i class="ti ti-world" aria-hidden="true"></i><span class="section-ip" id="currentIp">—</span></span>
+      <span class="metric" title="Скорость трафика"><i class="ti ti-activity" aria-hidden="true"></i><span class="section-speed" id="trafficSpeed">—</span></span>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <div class="scroll-area"><div class="cards" id="cards"><div class="empty-state">Загрузка…</div></div></div>
+</main>
+
+<!-- Модальное окно 1: Только группы (открывается по нажатию +) -->
+<div class="modal" id="groupsModal">
+  <div class="m-head">
+    <button class="m-back" id="closeGroupsModal" type="button"><i class="ti ti-arrow-left" aria-hidden="true"></i><span>Назад</span></button>
+    <div class="m-title-wrap"><span class="m-title">Вкладки групп</span><span class="m-subtitle">Выберите, что показывать в панели</span></div>
+  </div>
+  <div class="m-block">
+    <span class="m-hint">Отметьте группы для верхних вкладок. Стрелками меняйте их порядок, кнопкой «Назад» вернитесь к панели.</span>
+    <div class="m-groups" id="groupList"></div>
+  </div>
+</div>
+
+<!-- Модальное окно 2: Только подключение (открывается по нажатию ⚙) -->
+<div class="modal" id="connModal">
+  <div class="m-head">
+    <button class="m-back" id="closeConnModal" type="button"><i class="ti ti-arrow-left" aria-hidden="true"></i><span>Назад</span></button>
+    <div class="m-title-wrap"><span class="m-title">Настройки</span><span class="m-subtitle">Подключение и оформление виджета</span></div>
+  </div>
+  <div class="m-block">
+    <span class="m-section-title">Подключение Mihomo</span>
+    <span class="m-label">Адрес контроллера</span>
+    <input class="m-input" id="inHost" placeholder="http://host:port" spellcheck="false">
+  </div>
+  <div class="m-block">
+    <span class="m-label">Секрет / API Token</span>
+    <input class="m-input" id="inSecret" placeholder="секрет" type="password" spellcheck="false">
+  </div>
+  <div class="m-row" style="margin-top: 4px;">
+    <button class="m-btn" id="saveConn">Сохранить</button>
+    <button class="m-btn ghost" id="testConn">Проверить</button>
+  </div>
+  <span class="m-status" id="connStatus"></span>
+  <div class="m-block">
+    <span class="m-hint">Поддерживается любая Mihomo / Clash API панель (роутер, Clash Verge, FlClash и др.).</span>
+  </div>
+  <div class="m-block">
+    <span class="m-section-title">Режим Mihomo</span>
+    <select class="m-select" id="modeSelect">
+      <option value="rule">Rule</option>
+      <option value="global">Global</option>
+      <option value="direct">Direct</option>
+    </select>
+  </div>
+  <div class="m-block">
+    <span class="m-section-title">Язык</span>
+    <select class="m-select" id="languageSelect" aria-label="Язык"><option value="system">Как в системе</option><option value="ru">Русский</option><option value="en">English</option></select>
+  </div>
+  <div class="m-block">
+    <span class="m-section-title">Тема приложения</span>
+    <label class="m-label" for="themeSelect">Оформление</label>
+    <select class="m-select" id="themeSelect"><option value="system">Как в системе</option><option value="dark">Графит</option><option value="light">Светлая</option><option value="cocoa">Какао</option><option value="sage">Шалфей</option><option value="nocturne">Nocturne Bloom</option><option value="dune">Ethereal Dune</option><option value="lagoon">Astral Lagoon</option><option value="crimson">Crimson Haze</option><option value="jade">Jade Whisper</option><option value="velvet">Velvet Twilight</option><option value="amber">Amber Mirage</option><option value="sakura">Midnight Sakura</option><option value="lumiere">Lumiere Dark</option><option value="noir-amber">Noir Amber</option><option value="violet-ink">Violet Ink</option><option value="moss-noir">Moss Noir</option></select>
+  </div>
+  <div class="m-block">
+    <div class="transparency-head"><label class="m-section-title" for="transparencyRange">Прозрачность фона</label><output id="transparencyValue" for="transparencyRange">0%</output></div>
+    <input class="transparency-range" id="transparencyRange" type="range" min="0" max="60" step="5" value="0">
+    <span class="m-hint">Карточки и фон станут прозрачнее, текст останется чётким.</span>
+  </div>
+  <div class="m-block">
+    <span class="m-section-title">Карточки узлов</span>
+    <div class="m-nuar-row">
+      <div><div class="m-nuar-label">Показывать флаги</div><div class="m-nuar-sub">Страна рядом с названием узла, если её удалось определить</div></div>
+      <label class="m-toggle"><input type="checkbox" id="showFlags"><span class="m-toggle-track"></span><span class="m-toggle-thumb"></span></label>
+    </div>
+    <div class="m-nuar-row">
+      <div><div class="m-nuar-label">Цветной пинг</div><div class="m-nuar-sub">Зелёный, янтарный и красный по задержке</div></div>
+      <label class="m-toggle"><input type="checkbox" id="colorPing"><span class="m-toggle-track"></span><span class="m-toggle-thumb"></span></label>
+    </div>
+  </div>
+  <div class="m-block">
+    <span class="m-section-title">Поведение окна</span>
+    <div class="m-nuar-row"><div><div class="m-nuar-label">Поверх всех окон</div><div class="m-nuar-sub">Оставлять виджет поверх других приложений</div></div><label class="m-toggle"><input type="checkbox" id="alwaysOnTop" checked><span class="m-toggle-track"></span><span class="m-toggle-thumb"></span></label></div>
+    <div class="m-nuar-row"><div><div class="m-nuar-label">Прилипать к краям</div><div class="m-nuar-sub">Магнит к краям экрана и панели задач</div></div><label class="m-toggle"><input type="checkbox" id="edgeSnap" checked><span class="m-toggle-track"></span><span class="m-toggle-thumb"></span></label></div>
+    <div class="m-nuar-row"><div><div class="m-nuar-label">Клик насквозь</div><div class="m-nuar-sub">Выключается через меню трея</div></div><label class="m-toggle"><input type="checkbox" id="clickThrough"><span class="m-toggle-track"></span><span class="m-toggle-thumb"></span></label></div>
+    <span class="m-hint">Положение и размер окна сохраняются автоматически. Ctrl+Shift+Space — показать или скрыть виджет.</span>
+  </div>
+  <div class="m-block">
+    <span class="m-section-title">Система и данные</span>
+    <div class="m-nuar-row"><div><div class="m-nuar-label">Запускать вместе с Windows</div><div class="m-nuar-sub">Автозагрузка при входе в систему</div></div><label class="m-toggle"><input type="checkbox" id="autostart"><span class="m-toggle-track"></span><span class="m-toggle-thumb"></span></label></div>
+  </div>
+  <div class="m-block">
+    <span class="m-section-title">Обновления</span>
+    <span class="m-hint" id="updateStatus">Проверка выпусков GitHub после публикации первой версии.</span>
+    <div class="m-row"><button class="m-btn ghost" id="checkUpdates" type="button">Проверить обновления</button><button class="m-btn" id="installUpdate" type="button" hidden>Установить обновление</button></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+</div> <!-- /#widget-root -->
+
+<script src="i18n.js"></script>
+<script type="module">
+// Tauri bridge: HTTP requests run in the native process to avoid WebView CORS restrictions.
+const tauriInvoke = window.__TAURI__.core.invoke;
+const t = window.WidgetI18n.t;
+const settingsKeys = {
+  language: 'w_language', theme: 'w_theme', transparency: 'w_transparency',
+  showFlags: 'w_show_flags', colorPing: 'w_color_ping', host: 'w_host',
+  pinned: 'w_pinned', currentGroup: 'w_current'
+};
+let nativeSettings = null;
+try { nativeSettings = await tauriInvoke('get_settings'); } catch (_) {}
+if (nativeSettings) {
+  for (const [key, storageKey] of Object.entries(settingsKeys)) {
+    const value = nativeSettings[key];
+    if (value === undefined || value === null) continue;
+    localStorage.setItem(storageKey, Array.isArray(value) ? JSON.stringify(value) : typeof value === 'boolean' ? (value ? '1' : '0') : String(value));
+  }
+}
+let languagePreference = localStorage.getItem('w_language') || 'system';
+window.WidgetI18n.apply(languagePreference);
+document.getElementById('languageSelect').value = languagePreference;
+const savePrefs = patch => tauriInvoke('update_settings', { patch }).catch(() => {});
+const mihomo = (host, secret, path, method = 'GET', body = null) =>
+  tauriInvoke('mihomo_request', { host, secret, path, method, body });
+window.proxy = {
+  getProxies: (host, secret) => mihomo(host, secret, '/proxies'),
+  getProviders: (host, secret) => mihomo(host, secret, '/providers/proxies'),
+  setProxy: (host, secret, group, node) => mihomo(host, secret, '/proxies/' + encodeURIComponent(group), 'PUT', { name: node }),
+  testDelay: (host, secret, node) => mihomo(host, secret, '/proxies/' + encodeURIComponent(node) + '/delay?timeout=5000&url=http://www.gstatic.com/generate_204'),
+  testGroupDelay: (host, secret, group) => mihomo(host, secret, '/group/' + encodeURIComponent(group) + '/delay?timeout=5000&url=http://www.gstatic.com/generate_204'),
+  testProviderDelay: (host, secret, provider, node) => mihomo(host, secret, '/providers/proxies/' + encodeURIComponent(provider) + '/' + encodeURIComponent(node) + '/healthcheck?timeout=5000&url=http://www.gstatic.com/generate_204'),
+  version: (host, secret) => mihomo(host, secret, '/version'),
+  getConfig: (host, secret) => mihomo(host, secret, '/configs'),
+  patchConfig: (host, secret, data) => mihomo(host, secret, '/configs', 'PATCH', data),
+  trafficSample: (host, secret) => tauriInvoke('traffic_sample', { host, secret }),
+  setWindowTheme: (theme) => tauriInvoke('set_window_theme', { theme }),
+  minimizeToTray: () => tauriInvoke('hide_window'),
+  quitApp: () => tauriInvoke('quit_app'),
+};
+
+const DEF = { host: '', secret: '' };
+let HOST = localStorage.getItem('w_host') || DEF.host;
+let SECRET = localStorage.getItem('w_secret') || DEF.secret;
+
+let pinned = JSON.parse(localStorage.getItem('w_pinned') || 'null') || [];
+let currentGroup = localStorage.getItem('w_current') || 'PC';
+
+let all = {};
+let providerIndex = {};
+const measuredDelays = new Map();
+let trafficAbort = null;
+let lastSwitch = 0, toastTimer = null;
+
+/* ── Noir mode ── */
+const root = document.getElementById('widget-root');
+const THEMES = ['system', 'dark', 'light', 'cocoa', 'sage', 'nocturne', 'dune', 'lagoon', 'crimson', 'jade', 'velvet', 'amber', 'sakura', 'lumiere', 'noir-amber', 'violet-ink', 'moss-noir'];
+function applyTheme(theme = localStorage.getItem('w_theme') || 'dark') {
+  const choice = THEMES.includes(theme) ? theme : 'dark';
+  const next = choice === 'system' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : choice;
+  root.dataset.theme = next;
+  window.proxy.setWindowTheme(next).catch(() => {});
+  const select = document.getElementById('themeSelect');
+  if (select) select.value = choice;
+}
+applyTheme();
+matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+  if (localStorage.getItem('w_theme') === 'system') applyTheme('system');
+});
+
+function applyTransparency() {
+  const raw = Number(localStorage.getItem('w_transparency') || '0');
+  const amount = Number.isFinite(raw) ? Math.max(0, Math.min(60, raw)) : 0;
+  root.style.setProperty('--surface-opacity', `${100 - amount}%`);
+  document.getElementById('transparencyRange').value = String(amount);
+  document.getElementById('transparencyValue').textContent = `${amount}%`;
+}
+applyTransparency();
+
+function applyAppearance() {
+  const showFlags = localStorage.getItem('w_show_flags') === '1';
+  const colorPing = localStorage.getItem('w_color_ping') === '1';
+  root.classList.toggle('show-flags', showFlags);
+  root.classList.toggle('color-ping', colorPing);
+  document.getElementById('showFlags').checked = showFlags;
+  document.getElementById('colorPing').checked = colorPing;
+  if (all[currentGroup]) renderCards();
+}
+applyAppearance();
+
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'themeSelect') {
+    localStorage.setItem('w_theme', e.target.value);
+    applyTheme(e.target.value);
+    savePrefs({ theme: e.target.value });
+  } else if (e.target.id === 'languageSelect') {
+    languagePreference = e.target.value;
+    localStorage.setItem('w_language', languagePreference);
+    window.WidgetI18n.apply(languagePreference);
+    if (currentIp) document.getElementById('currentIp').title = t('Внешний IP: {ip} (нажмите для копирования)', { ip: currentIp });
+    savePrefs({ language: languagePreference });
+    if (HOST.trim()) { renderTabs(); renderCards(); } else { load(); }
+    if (document.getElementById('groupsModal').classList.contains('open')) renderGroupList();
+  } else if (e.target.id === 'showFlags' || e.target.id === 'colorPing') {
+    localStorage.setItem(e.target.id === 'showFlags' ? 'w_show_flags' : 'w_color_ping', e.target.checked ? '1' : '0');
+    applyAppearance();
+    savePrefs(e.target.id === 'showFlags' ? { showFlags: e.target.checked } : { colorPing: e.target.checked });
+  }
+});
+document.getElementById('transparencyRange').addEventListener('input', e => {
+  localStorage.setItem('w_transparency', e.target.value);
+  applyTransparency();
+  savePrefs({ transparency: Number(e.target.value) });
+});
+if (!nativeSettings) savePrefs({ language: languagePreference, theme: localStorage.getItem('w_theme') || 'dark',
+  transparency: Number(localStorage.getItem('w_transparency') || 0), showFlags: localStorage.getItem('w_show_flags') === '1',
+  colorPing: localStorage.getItem('w_color_ping') === '1', host: localStorage.getItem('w_host') || '',
+  pinned: JSON.parse(localStorage.getItem('w_pinned') || '[]'), currentGroup: localStorage.getItem('w_current') || 'PC' });
+
+function host() { return HOST.replace(/\/+$/, ''); }
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + type;
+  requestAnimationFrame(() => el.classList.add('show'));
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+function cleanNodeName(name = '') {
+  return String(name).replace(/^[\u{1F1E6}-\u{1F1FF}]{2}\s*/u, '').replace(/^[🌐⚡]\s*/u, '').trim();
+}
+
+const COUNTRY_HINTS = [
+  ['jp', /TOKYO|JAPAN|ЯПОНИ|ТОКИО|(?:^|[^A-Z])JP(?:\d|[^A-Z]|$)/],
+  ['hk', /HONG.?KONG|ГОНКОНГ|(?:^|[^A-Z])HK(?:\d|[^A-Z]|$)/],
+  ['sg', /SINGAPORE|СИНГАПУР|(?:^|[^A-Z])SG(?:\d|[^A-Z]|$)/],
+  ['de', /FRANKFURT|BERLIN|GERMANY|ГЕРМАНИ|(?:^|[^A-Z])DE(?:\d|[^A-Z]|$)/],
+  ['us', /NEW.?YORK|LOS.?ANGELES|USA|США|(?:^|[^A-Z])US(?:\d|[^A-Z]|$)/],
+  ['nl', /AMSTERDAM|NETHERLAND|НИДЕРЛАНД/],
+  ['gb', /LONDON|BRITAIN|БРИТАН|(?:^|[^A-Z])UK(?:\d|[^A-Z]|$)/],
+  ['ru', /RUSSIA|МОСКВ|РОССИ|(?:^|[^A-Z])RU(?:\d|[^A-Z]|$)/],
+  ['fr', /FRANCE|PARIS|ФРАНЦ/],
+  ['au', /SYDNEY|AUSTRALIA|АВСТРАЛ/],
+  ['kr', /SEOUL|KOREA|КОРЕ/],
+  ['ca', /TORONTO|CANADA|КАНАД/],
+];
+function flagHtml(name = '') {
+  if (!root.classList.contains('show-flags')) return '';
+  const emoji = String(name).match(/[\u{1F1E6}-\u{1F1FF}]{2}/u);
+  let code = emoji ? [...emoji[0]].map(ch => String.fromCharCode(ch.codePointAt(0) - 0x1F1E6 + 97)).join('') : '';
+  if (!code) {
+    const upper = String(name).toUpperCase();
+    code = COUNTRY_HINTS.find(([, pattern]) => pattern.test(upper))?.[0] || '';
+  }
+  return /^[a-z]{2}$/.test(code) ? `<img class="flag" src="flags/${code}.svg" alt="" aria-hidden="true">` : '';
+}
+
+const GROUP_TYPES = ['Selector', 'URLTest', 'Fallback', 'LoadBalance'];
+function groupNames() {
+  return Object.keys(all).filter(k => all[k] && GROUP_TYPES.includes(all[k].type));
+}
+
+async function load(silent) {
+  if (!HOST.trim() || !SECRET.trim()) {
+    all = {};
+    document.getElementById('connDot').classList.add('off');
+    document.getElementById('hostLabel').textContent = t('Не подключено');
+    document.getElementById('groupTitle').textContent = t('Подключение');
+    document.getElementById('activeNode').textContent = t('Подключите Mihomo');
+    document.getElementById('currentIp').textContent = '—';
+    document.getElementById('trafficSpeed').textContent = '—';
+    document.getElementById('tabs').innerHTML = '';
+    document.getElementById('cards').innerHTML = `<div class="empty-state"><div style="margin-bottom:12px">${t('Укажите адрес Mihomo и API secret, чтобы начать.')}</div><button id="connectNow" class="m-btn">${t('Настроить подключение')}</button></div>`;
+    document.getElementById('connectNow').onclick = openConnModal;
+    return;
+  }
+  try {
+    const data = await window.proxy.getProxies(HOST, SECRET);
+    all = data.proxies || {};
+    try {
+      const providerData = await window.proxy.getProviders(HOST, SECRET);
+      providerIndex = {};
+      for (const [providerName, provider] of Object.entries(providerData.providers || {})) {
+        for (const proxy of provider.proxies || []) {
+          if (proxy && proxy.name) providerIndex[proxy.name] = { providerName, proxy };
+        }
+      }
+    } catch { providerIndex = {}; }
+    if (!localStorage.getItem('w_pinned')) {
+      pinned = groupNames();
+      localStorage.setItem('w_pinned', JSON.stringify(pinned));
+      savePrefs({ pinned });
+    }
+    if (!silent) document.getElementById('connDot').classList.remove('off');
+    if (!groupNames().includes(currentGroup)) currentGroup = pinned.find(g => groupNames().includes(g)) || groupNames()[0] || '';
+    renderTabs();
+    renderCards();
+    if (!trafficAbort) startTraffic();
+  } catch (e) {
+    document.getElementById('connDot').classList.add('off');
+    document.getElementById('cards').innerHTML =
+      `<div class="empty-state">${t('Нет связи с панелью')}<br><small style="opacity:.7">${esc(HOST)}</small></div>`;
+    if (!silent) toast(t('Панель недоступна'), 'error');
+  }
+}
+
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+/* ─── Вкладки ─── */
+function renderTabs() {
+  const box = document.getElementById('tabs');
+  box.innerHTML = '';
+  const avail = groupNames();
+
+  pinned.filter(g => avail.includes(g)).forEach(g => {
+    const b = document.createElement('button');
+    b.className = 'tab' + (g === currentGroup ? ' active' : '');
+    b.type = 'button';
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-selected', String(g === currentGroup));
+    b.setAttribute('aria-controls', 'cards');
+    b.tabIndex = g === currentGroup ? 0 : -1;
+    b.textContent = g;
+    b.onclick = () => {
+      currentGroup = g;
+      localStorage.setItem('w_current', g);
+      savePrefs({ currentGroup: g });
+      renderTabs();
+      renderCards();
+      setTimeout(() => updateExternalIp(true), 600);
+    };
+    box.appendChild(b);
+  });
+  box.onkeydown = e => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+    const tabs = [...box.querySelectorAll('[role="tab"]')];
+    if (!tabs.length) return;
+    e.preventDefault();
+    const index = tabs.indexOf(document.activeElement);
+    const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1
+      : (index + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    tabs[next].click();
+    box.querySelectorAll('[role="tab"]')[next]?.focus();
+  };
+}
+
+function proxyFor(name) { return all[name] || providerIndex[name]?.proxy || null; }
+function delay(p, name = '') {
+  const cached = measuredDelays.get(name);
+  if (cached && Date.now() - cached.at < 10 * 60 * 1000) return cached.ms;
+  const history = p?.history || [];
+  const d = history.length ? history[history.length - 1].delay : null;
+  return d > 0 ? d : null;
+}
+
+function pingClass(ms) {
+  if (ms == null) return 'none';
+  if (ms < 200) return '';
+  if (ms < 500) return 'warn';
+  return 'bad';
+}
+
+function renderCards() {
+  const g = all[currentGroup];
+  document.getElementById('hostLabel').textContent = host().replace(/^https?:\/\//, '');
+
+  if (!g) {
+    document.getElementById('cards').innerHTML = `<div class="empty-state">${t('Группа не выбрана')}</div>`;
+    document.getElementById('groupTitle').textContent = t('Группы');
+    document.getElementById('activeNode').textContent = '—';
+    return;
+  }
+
+  const now = proxyFor(g.now);
+  const d = delay(now, g.now);
+  document.getElementById('groupTitle').textContent = currentGroup;
+  document.getElementById('activeNode').innerHTML = `${flagHtml(g.now || '')}${esc(cleanNodeName(g.now || '—'))}`;
+  document.getElementById('activeNode').title = `[${currentGroup}] ${g.now || ''}`;
+
+  const box = document.getElementById('cards');
+  box.innerHTML = '';
+
+  (g.all || []).forEach(name => {
+    const n = proxyFor(name);
+    const ms = delay(n, name);
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'card' + (g.now === name ? ' active' : '');
+    card.title = name + ' · ' + (n ? n.type : '');
+    card.innerHTML = `
+      <div class="card-top">
+        ${flagHtml(name)}
+        <span class="card-title">${esc(cleanNodeName(name))}</span>
+      </div>
+      <div class="card-bottom">
+        <span class="card-sub">${esc(n ? n.type : '')}</span>
+        <span class="ping ${pingClass(ms)}">${ms ? ms + 'ms' : '—'}</span>
+      </div>`;
+    card.onclick = () => pick(name);
+    box.appendChild(card);
+  });
+}
+
+async function pick(name) {
+  const t = Date.now();
+  if (t - lastSwitch < 600) return;
+  lastSwitch = t;
+
+  const g = all[currentGroup];
+  if (!g || g.now === name) return;
+
+  const prev = g.now;
+  g.now = name;
+  renderCards();
+  toast(t('Переключение…'));
+
+  try {
+    await window.proxy.setProxy(HOST, SECRET, currentGroup, name);
+    toast(name + ' ✓', 'success');
+    setTimeout(() => updateExternalIp(true), 900);
+    await load(true);   // ждём свежих данных — topPing обновится
+  } catch (e) {
+    g.now = prev;
+    renderCards();
+    toast(t('Не удалось переключить'), 'error');
+  }
+}
+
+async function refresh() {
+  if (!HOST.trim() || !SECRET.trim()) {
+    openConnModal();
+    return;
+  }
+  const btn = document.getElementById('refreshBtn');
+  if (btn.classList.contains('spinning')) return;
+  btn.classList.add('spinning');
+
+  const g = all[currentGroup];
+  const names = g && g.all ? g.all : [];
+  if (!names.length) {
+    btn.classList.remove('spinning');
+    toast(t('В группе нет узлов'));
+    return;
+  }
+  try {
+    const results = await Promise.all(names.map(async name => {
+      try {
+        let result = null;
+        try { result = await window.proxy.testDelay(HOST, SECRET, name); } catch {}
+        if (!(Number(result?.delay) > 0)) {
+          const provider = providerIndex[name]?.providerName;
+          if (provider) result = await window.proxy.testProviderDelay(HOST, SECRET, provider, name);
+          else if (GROUP_TYPES.includes(all[name]?.type)) result = await window.proxy.testGroupDelay(HOST, SECRET, name);
+        }
+        const ms = Number(result?.delay);
+        if (!(ms > 0)) return false;
+        measuredDelays.set(name, { ms, at: Date.now() });
+        return true;
+      } catch {
+        return false;
+      }
+    }));
+    renderCards();
+    const count = results.filter(Boolean).length;
+    toast(count ? t('Пинг: {count} из {total} узлов', { count, total: names.length }) : t('Узлы не ответили на проверку'), count ? 'success' : 'error');
+  } catch {
+    toast(t('Ошибка пинга'), 'error');
+  }
+  setTimeout(() => btn.classList.remove('spinning'), 500);
+}
+
+async function startTraffic() {
+  const el = document.getElementById('trafficSpeed');
+  try {
+    const t = await window.proxy.trafficSample(HOST, SECRET);
+    el.textContent = fmt((t.up || 0) + (t.down || 0));
+  } catch {
+    el.textContent = '—';
+  }
+}
+
+function fmt(b) {
+  if (b < 1024) return Math.round(b) + ' B/s';
+  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB/s';
+  return (b / 1048576).toFixed(1) + ' MB/s';
+}
+
+/* ─── Модалки ─── */
+function openGroupsModal() {
+  renderGroupList();
+  document.getElementById('groupsModal').classList.add('open');
+}
+
+function openConnModal() {
+  document.getElementById('inHost').value = HOST;
+  document.getElementById('inSecret').value = SECRET;
+  document.getElementById('connStatus').textContent = '';
+  document.getElementById('themeSelect').value = localStorage.getItem('w_theme') || 'dark';
+  if (HOST.trim() && SECRET.trim()) {
+    window.proxy.getConfig(HOST, SECRET).then(cfg => {
+      const sel = document.getElementById('modeSelect');
+      if (sel && cfg && cfg.mode) sel.value = cfg.mode.toLowerCase();
+    }).catch(() => {});
+  }
+  document.getElementById('connModal').classList.add('open');
+}
+
+document.getElementById('modeSelect').onchange = async function() {
+  if (!HOST.trim() || !SECRET.trim()) return;
+  const mode = this.value;
+  try {
+    await window.proxy.patchConfig(HOST, SECRET, { mode });
+    toast(t('Режим: {mode}', { mode }), 'success');
+  } catch(e) {
+    toast(t('Ошибка смены режима'), 'error');
+  }
+};
+
+function renderGroupList() {
+  const box = document.getElementById('groupList');
+  box.innerHTML = '';
+  const avail = groupNames().sort((a, b) => {
+    const ai = pinned.indexOf(a), bi = pinned.indexOf(b);
+    if (ai !== -1 && bi !== -1) return ai - bi;
+    if (ai !== -1) return -1;
+    if (bi !== -1) return 1;
+    return a.localeCompare(b);
+  });
+
+  if (!avail.length) {
+    box.innerHTML = `<span class="m-hint">${t('Список пуст — панель недоступна.')}</span>`;
+    return;
+  }
+
+  avail.forEach(name => {
+    const g = all[name];
+    const row = document.createElement('div');
+    row.className = 'm-group';
+    const checked = pinned.includes(name);
+    const index = pinned.indexOf(name);
+    row.innerHTML = `
+      <input type="checkbox" ${checked ? 'checked' : ''}>
+      <span class="m-group-name">${esc(name)}</span>
+      <span class="m-group-meta">${t('{count} узл.', { count: (g.all || []).length })}</span>
+      ${checked ? `<span class="group-order"><button class="order-btn move-up" type="button" aria-label="${esc(t('Поднять {name}', { name }))}" ${index === 0 ? 'disabled' : ''}><i class="ti ti-arrow-up" aria-hidden="true"></i></button><button class="order-btn move-down" type="button" aria-label="${esc(t('Опустить {name}', { name }))}" ${index === pinned.length - 1 ? 'disabled' : ''}><i class="ti ti-arrow-down" aria-hidden="true"></i></button></span>` : ''}`;
+    row.querySelector('input').onchange = (e) => {
+      if (e.target.checked) {
+        if (!pinned.includes(name)) pinned.push(name);
+      } else {
+        pinned = pinned.filter(x => x !== name);
+      }
+      localStorage.setItem('w_pinned', JSON.stringify(pinned));
+      savePrefs({ pinned });
+      if (!pinned.includes(currentGroup) && pinned.length) currentGroup = pinned[0];
+      renderTabs();
+      renderCards();
+      renderGroupList();
+    };
+    row.querySelector('.move-up')?.addEventListener('click', (e) => movePinnedGroup(e, name, -1));
+    row.querySelector('.move-down')?.addEventListener('click', (e) => movePinnedGroup(e, name, 1));
+    box.appendChild(row);
+  });
+}
+
+function movePinnedGroup(event, name, direction) {
+  event.preventDefault();
+  event.stopPropagation();
+  const index = pinned.indexOf(name);
+  const next = index + direction;
+  if (index < 0 || next < 0 || next >= pinned.length) return;
+  [pinned[index], pinned[next]] = [pinned[next], pinned[index]];
+  localStorage.setItem('w_pinned', JSON.stringify(pinned));
+  savePrefs({ pinned });
+  renderTabs();
+  renderGroupList();
+}
+
+async function testConn() {
+  const st = document.getElementById('connStatus');
+  st.className = 'm-status';
+  st.textContent = t('Проверяю…');
+  const h = document.getElementById('inHost').value.trim();
+  const s = document.getElementById('inSecret').value.trim();
+  if (!h || !s) {
+    st.className = 'm-status err';
+    st.textContent = t('Укажи адрес панели и API secret.');
+    return false;
+  }
+  try {
+    const v = await window.proxy.version(h, s);
+    st.className = 'm-status ok';
+    st.textContent = 'OK · ' + (v.version ? 'Mihomo ' + v.version : t('панель отвечает'));
+    return true;
+  } catch (e) {
+    st.className = 'm-status err';
+    st.textContent = t('Не отвечает. Проверь адрес и секрет.');
+    return false;
+  }
+}
+
+async function saveConn() {
+  const h = document.getElementById('inHost').value.trim();
+  const s = document.getElementById('inSecret').value.trim();
+  const ok = await testConn();
+  if (!ok) { toast(t('Панель не отвечает'), 'error'); return; }
+  HOST = h; SECRET = s;
+  localStorage.setItem('w_host', h);
+  localStorage.setItem('w_secret', s);
+  savePrefs({ host: h });
+  trafficAbort && trafficAbort.abort();
+  trafficAbort = null;
+  document.getElementById('connModal').classList.remove('open');
+  await load();
+  toast(t('Подключение обновлено'), 'success');
+}
+
+let currentIp = '';
+let ipInFlight = false;
+async function updateExternalIp(force = false) {
+  if (!HOST.trim() || !SECRET.trim()) {
+    const emptyIp = document.getElementById('currentIp');
+    if (emptyIp) emptyIp.textContent = '—';
+    return;
+  }
+  if (ipInFlight && !force) return;
+  const el = document.getElementById('currentIp');
+  if (!el) return;
+  if (force || !currentIp) {
+    el.textContent = 'IP…';
+    el.style.opacity = '0.6';
+  }
+  ipInFlight = true;
+  try {
+    const res = await fetch('https://api.ipify.org?format=json', { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.ip) {
+        currentIp = data.ip;
+        el.textContent = data.ip;
+        el.title = t('Внешний IP: {ip} (нажмите для копирования)', { ip: data.ip });
+        el.style.opacity = '1';
+        return;
+      }
+    }
+  } catch (e) {
+    try {
+      const res2 = await fetch('https://icanhazip.com', { cache: 'no-store' });
+      if (res2.ok) {
+        const txt = (await res2.text()).trim();
+        if (txt) {
+          currentIp = txt;
+          el.textContent = txt;
+          el.title = t('Внешний IP: {ip} (нажмите для копирования)', { ip: txt });
+          el.style.opacity = '1';
+          return;
+        }
+      }
+    } catch (_) {}
+    if (!currentIp) {
+      el.textContent = 'IP —';
+      el.style.opacity = '0.5';
+    }
+  } finally {
+    ipInFlight = false;
+  }
+}
+
+/* ─── События ─── */
+document.getElementById('refreshBtn').onclick = refresh;
+document.getElementById('settingsBtn').onclick = openConnModal;
+document.getElementById('openGroupsBtn').onclick = openGroupsModal;
+document.getElementById('closeGroupsModal').onclick = () => document.getElementById('groupsModal').classList.remove('open');
+document.getElementById('closeConnModal').onclick = () => document.getElementById('connModal').classList.remove('open');
+document.getElementById('saveConn').onclick = saveConn;
+document.getElementById('testConn').onclick = testConn;
+document.getElementById('closeBtn').onclick = () => window.proxy.minimizeToTray();
+
+const topToggle = document.getElementById('alwaysOnTop');
+const snapToggle = document.getElementById('edgeSnap');
+const clickToggle = document.getElementById('clickThrough');
+const autostartToggle = document.getElementById('autostart');
+topToggle.checked = nativeSettings?.alwaysOnTop ?? true;
+snapToggle.checked = nativeSettings?.edgeSnap ?? true;
+clickToggle.checked = false;
+tauriInvoke('get_autostart').then(value => { autostartToggle.checked = value; }).catch(() => {});
+topToggle.onchange = async () => {
+  try { await tauriInvoke('set_always_on_top', { enabled: topToggle.checked }); }
+  catch { topToggle.checked = !topToggle.checked; toast(t('Не удалось изменить настройку'), 'error'); }
+};
+snapToggle.onchange = () => savePrefs({ edgeSnap: snapToggle.checked });
+clickToggle.onchange = async () => {
+  try { await tauriInvoke('set_click_through', { enabled: clickToggle.checked }); }
+  catch { clickToggle.checked = !clickToggle.checked; toast(t('Не удалось изменить настройку'), 'error'); }
+};
+autostartToggle.onchange = async () => {
+  try { await tauriInvoke('set_autostart', { enabled: autostartToggle.checked }); }
+  catch { autostartToggle.checked = !autostartToggle.checked; toast(t('Не удалось изменить настройку'), 'error'); }
+};
+window.__TAURI__.event.listen('open-widget-settings', () => openConnModal());
+window.__TAURI__.event.listen('widget-settings-changed', event => {
+  topToggle.checked = !!event.payload?.[0];
+  clickToggle.checked = !!event.payload?.[1];
+});
+
+async function checkUpdates(manual = false) {
+  const label = document.getElementById('updateStatus');
+  if (manual) label.textContent = t('Проверка обновлений…');
+  try {
+    const release = await tauriInvoke('check_updates');
+    if (!release) { label.textContent = t('Выпусков пока нет'); return; }
+    document.getElementById('installUpdate').hidden = !release.canInstall;
+    if (release.available) {
+      label.textContent = t('Доступна версия {version}', { version: release.version });
+      if (release.url) {
+        const link = document.createElement('a');
+        link.href = release.url;
+        link.textContent = ' GitHub Releases';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        label.appendChild(link);
+      }
+    } else label.textContent = t('Обновлений нет');
+  } catch { if (manual) label.textContent = t('Не удалось проверить обновления'); }
+}
+document.getElementById('checkUpdates').onclick = () => checkUpdates(true);
+document.getElementById('installUpdate').onclick = async () => {
+  try {
+    document.getElementById('installUpdate').disabled = true;
+    await tauriInvoke('install_update');
+  } catch {
+    document.getElementById('installUpdate').disabled = false;
+    toast(t('Не удалось проверить обновления'), 'error');
+  }
+};
+if (Date.now() - Number(localStorage.getItem('w_update_checked') || 0) > 24 * 3600 * 1000) {
+  checkUpdates();
+  localStorage.setItem('w_update_checked', String(Date.now()));
+}
+
+load();
+updateExternalIp();
+setInterval(() => {
+  if (document.getElementById('groupsModal').classList.contains('open') ||
+      document.getElementById('connModal').classList.contains('open')) return;
+  load(true);
+}, 10000);
+setInterval(() => updateExternalIp(), 45000);
+</script>
+</body>
+</html>
