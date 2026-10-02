@@ -371,7 +371,7 @@ let all = {};
 let providerIndex = {};
 const measuredDelays = new Map();
 let trafficAbort = null;
-let lastSwitch = 0, toastTimer = null;
+let lastSwitch = 0, switchPending = false, toastTimer = null;
 
 /* ── Noir mode ── */
 const root = document.getElementById('widget-root');
@@ -625,27 +625,29 @@ function renderCards() {
 }
 
 async function pick(name) {
-  const t = Date.now();
-  if (t - lastSwitch < 600) return;
-  lastSwitch = t;
+  const nowMs = Date.now();
+  if (switchPending || nowMs - lastSwitch < 600) return;
+  lastSwitch = nowMs;
 
-  const g = all[currentGroup];
+  const group = currentGroup;
+  const g = all[group];
   if (!g || g.now === name) return;
-
-  const prev = g.now;
-  g.now = name;
-  renderCards();
-  toast(t('Переключение…'));
+  switchPending = true;
 
   try {
-    await window.proxy.setProxy(HOST, SECRET, currentGroup, name);
+    toast(t('Переключение…'));
+    await window.proxy.setProxy(HOST, SECRET, group, name);
+    const confirmed = await window.proxy.getProxies(HOST, SECRET);
+    if (confirmed.proxies?.[group]?.now !== name) throw new Error('Mihomo did not apply selection');
+    all = confirmed.proxies;
+    renderCards();
     toast(name + ' ✓', 'success');
     setTimeout(() => updateExternalIp(true), 900);
-    await load(true);   // ждём свежих данных — topPing обновится
   } catch (e) {
-    g.now = prev;
-    renderCards();
     toast(t('Не удалось переключить'), 'error');
+    await load(true);
+  } finally {
+    switchPending = false;
   }
 }
 
